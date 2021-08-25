@@ -21,6 +21,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
+ * English:
+ * <p>
  * The root interface for accessing a Spring bean container.
  *
  * <p>This is the basic client view of a bean container;
@@ -94,6 +96,59 @@ import org.springframework.lang.Nullable;
  * <li>DisposableBean's {@code destroy}
  * <li>a custom {@code destroy-method} definition
  * </ol>
+ *
+ * <p></p>
+ * 中文：
+ * <p>访问Spring bean 容器的根接口
+ *
+ * <p>这是一个bean容器的基本客户端视图；
+ * 其他接口如{@link ListableBeanFactory}
+ * 和{@link org.springframework.beans.factory.config.ConfigurableBeanFactory}可用于特殊的目的
+ *
+ * <p>这个接口的实现为持有多个bean definition的对象，每个bean definitions用唯一一个String类型的名称区分。
+ * 根据bean definition，这个工厂要么返回一个其持有对象的独立实例（原型设计模式），要么返回一个单个共享实例
+ * （这是一个更好的单例模式替代方案，在工厂范围内，以命名作为唯一实例）。具体返回哪一种取决于bean factory配置：
+ * bean factory的API是一样的。从Spring 2.0开始，更多的领域依赖于特定的容器（例如：Web环境下的"reuqest"和"session"领域）
+ *
+ * <p>这种方法的要点在于：BeanFactory是容器组件的中央注册器，并且集中了容器组件的配置（例如，不再需要各个对象去读取properties文件）
+ * 请参阅《Expert One-on-One J2EE Design and Development》一书中的第4章和第11章了解这种设计的优点
+ *
+ * <p>请注意，最好使用依赖注入（"推送"配置）的setter方法或者构造器方法来配置对象，
+ * 而不是使用在BeanFactory中搜索（”拉取“配置）的方式来配置对象，Spring的依赖注入功能就是使用BeanFactory接口和其子接口实现的
+ *
+ * <p>通常，BeanFactory会加载存储在配置源（例如XML文件）中的bean definition，然后用{@code org.springframework.beans}
+ * 包来配置这些bean。但是，某些实现会简单的直接在Java代码中返回它根据某些需要而创建的Java对象。对于如何存储definition（LDAP、
+ * RDBMA、XML、properties文件）没有限制。推荐实现不同bean之间的引用关系（依赖注入）
+ *
+ * <p>与{@link ListableBeanFactory}接口中的方法相反，当前如果是{@link HierarchicalBeanFactory}接口，那么这个接口中的所有
+ * 方法都会验证父类的工厂。如果在当前工厂中没有找到bean，那么直接询问父类工厂。在当前工厂中的Bean实例将会覆盖所有父类工厂的同名实例
+ *
+ * <p>BeanFactory的具体实现应当尽可能的支持标准的bean生命周期接口。全套初始化方法其标准流程如下：
+ * <ol>
+ *     <li>调用BeanNameAware的{@code setBeanName}
+ *     <li>调用BeanClassLoaderAware的{@code setBeanClassLoader}
+ *     <li>调用BeanFactoryAware的{@code setBeanFactory}
+ *     <li>调用EnvironmentAware的{@code setEnvironment}
+ *     <li>调用EmbeddedValueResolverAware的{@code setEmbeddedValueResolver}
+ *     <li>调用ResourceLoaderAware的 {@code setResourceLoader}（只有在容器运行时适用）
+ *     <li>调用ApplicationEventPublisherAware的{@code setApplicationEventPublisher}（只有在容器运行时适用）
+ *     <li>调用MessageSourceAware的{@code setMessageSource}（只有在容器运行时适用）
+ *     <li>调用ApplicationContextAware的{@code setApplicationContext}（只有在容器运行时适用）
+ *     <li>调用ServletContextAware的{@code setServletContext}（只有在容器运行时适用）
+ *     <li>调用BeanPostProcessors的{@code postProcessBeforeInitialization}
+ *     <li>调用InitializingBean的{@code afterPropertiesSet}
+ *     <li>调用自定义{@code init-method}
+ *     <li>调用BeanPostProcessors的{@code postProcessAfterInitialization}
+ * </ol>
+ *
+ * <p>BeanFatory关闭时，需要以下生命周期：
+ * <ol>
+ *     <li>调用DestructionAwareBeanPostProcessors的{@code postProcessBeforeDestruction}
+ *     <li>调用DisposableBean的{@code destroy}
+ *     <li>调用自定义{@code destroy-method}
+ * </ol>
+ *
+ * <p></p>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
